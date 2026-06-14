@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ana Saltbread - Secure BI Dashboard</title>
+    <style>
+        :root {
+            --primary-color: #4A3B32;
+            --accent-color: #D4AF37;
+            --bg-light: #FDFBF7;
+            --text-dark: #2C2520;
+            --text-muted: #7A7067;
+            --success: #2E7D32;
+            --danger: #C62828;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-dark); padding: 2rem; }
+
+        .page { display: none; }
+        .page.active { display: block; }
+        .card { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #ECE7E1; }
+
+        /* Login Box */
+        .login-container { max-width: 400px; margin: 8rem auto; text-align: center; }
+        .login-container input { width: 100%; padding: 0.8rem; margin: 1rem 0; border: 1px solid #D1C7BD; border-radius: 8px; text-align: center; font-size: 1rem;}
+        .btn-block { width: 100%; padding: 1rem; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        /* Dashboard View */
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 2px solid #4A3B32; padding-bottom: 1rem;}
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        .kpi-card { background: white; padding: 1.5rem; border-radius: 10px; border-left: 5px solid var(--primary-color); box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        .kpi-value { font-size: 2rem; font-weight: bold; margin-top: 0.5rem; }
+
+        .dashboard-main { display: grid; grid-template-columns: 3fr 2fr; gap: 2rem; }
+        
+        /* Bar Chart BI */
+        .bar-chart { display: flex; justify-content: space-between; align-items: flex-end; height: 180px; border-bottom: 2px solid var(--primary-color); padding-top: 1rem; }
+        .bar-wrapper { display: flex; flex-direction: column; align-items: center; width: 15%; }
+        .bar { width: 60%; background-color: var(--accent-color); border-radius: 4px 4px 0 0; }
+        .bar-label { font-size: 0.75rem; margin-top: 0.5rem; }
+
+        /* Operator Table */
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.8rem; border-bottom: 1px solid #ECE7E1; text-align: left; }
+        th { background: #F5F1EB; }
+        .btn-action { padding: 0.4rem 0.8rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; color: white;}
+        .btn-call { background: var(--accent-color); }
+        .btn-done { background: var(--success); margin-left: 4px; }
+    </style>
+</head>
+<body>
+
+    <!-- GATEWAY LOGIN -->
+    <div id="login-page" class="page active">
+        <div class="login-container card">
+            <h2>Ana Saltbread BI System</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">Sistem Khusus Manajemen & Owner internal</p>
+            <form onsubmit="handleLogin(event)">
+                <input type="password" id="passInput" placeholder="Masukkan Sandi Keamanan" required>
+                <button type="submit" class="btn-block">Buka Kunci Data</button>
+            </form>
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 10px;">Sandi: <b>saltbreadana</b></p>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD BI -->
+    <div id="dashboard-page" class="page">
+        <div class="dashboard-header">
+            <div>
+                <h1>Business Intelligence Dashboard (Owner)</h1>
+                <p style="color: var(--text-muted)">Data Analisis Finansial & Manajemen Antrean Toko Ana</p>
+            </div>
+            <button onclick="handleLogout()" style="padding: 0.5rem 1rem; background: var(--danger); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Kunci Dashboard</button>
+        </div>
+
+        <!-- KPI CARDS -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">TOTAL ANTREAN HARI INI</div>
+                <div class="kpi-value" id="kpiTotal">0</div>
+            </div>
+            <div class="kpi-card" style="border-left-color: var(--accent-color);">
+                <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">SEDANG MENUNGGU</div>
+                <div class="kpi-value" id="kpiWaiting">0</div>
+            </div>
+            <div class="kpi-card" style="border-left-color: var(--success);">
+                <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">ESTIMASI OMZET HARI INI</div>
+                <div class="kpi-value" id="kpiRevenue">Rp 0</div>
+            </div>
+            <div class="kpi-card">
+                <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">RERATA WAKTU TUNGGU</div>
+                <div class="kpi-value">12 Menit</div>
+            </div>
+        </div>
+
+        <div class="dashboard-main">
+            <!-- BI ANALYTICS CHART -->
+            <div class="card">
+                <h3 style="margin-bottom: 1rem;">Visualisasi BI: Tren Lonjakan Pengunjung Per Jam</h3>
+                <div class="bar-chart">
+                    <div class="bar-wrapper"><div class="bar" style="height: 80%;"></div><div class="bar-label">04:00</div></div>
+                    <div class="bar-wrapper"><div class="bar" style="height: 40%;"></div><div class="bar-label">06:00</div></div>
+                    <div class="bar-wrapper"><div class="bar" style="height: 95%;"></div><div class="bar-label">08:00</div></div>
+                    <div class="bar-wrapper"><div class="bar" style="height: 60%;"></div><div class="bar-label">10:00</div></div>
+                    <div class="bar-wrapper"><div class="bar" style="height: 30%;"></div><div class="bar-label">12:00</div></div>
+                </div>
+                <p style="font-size: 0.8rem; color: #b08d26; margin-top: 1rem; font-weight: 600;">Insight: Lonjakan antrean dimulai dari jam 4 pagi. Penambahan kapasitas panggangan kloter pertama direkomendasikan.</p>
+            </div>
+
+            <!-- QUEUE MANAGEMENT TABLE -->
+            <div class="card">
+                <h3 style="margin-bottom: 1rem;">Live Queue Controller</h3>
+                <table>
+                    <thead>
+                        <tr><th>No</th><th>Nama</th><th>Qty</th><th>Aksi</th></tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isAuthorized = false;
+        const breadPrice = 10000;
+
+        function handleLogin(event) {
+            event.preventDefault();
+            if(document.getElementById('passInput').value === 'saltbreadana') {
+                isAuthorized = true;
+                document.getElementById('login-page').classList.remove('active');
+                document.getElementById('dashboard-page').classList.add('active');
+                renderDashboard();
+            } else { alert("Sandi Akses BI Salah!"); }
+        }
+
+        function handleLogout() {
+            isAuthorized = false;
+            document.getElementById('passInput').value = '';
+            document.getElementById('dashboard-page').classList.remove('active');
+            document.getElementById('login-page').classList.add('active');
+        }
+
+        function renderDashboard() {
+            if(!isAuthorized) return;
+            
+            const queueData = JSON.parse(localStorage.getItem('queueData')) || [];
+            const totalServedToday = parseInt(localStorage.getItem('totalServedToday')) || 0;
+            
+            let totalQueue = totalServedToday + queueData.length;
+            let currentWaiting = queueData.length;
+            let revenue = totalQueue * 3 * breadPrice; // Asumsi rata-rata beli 3 pcs
+
+            document.getElementById('kpiTotal').innerText = totalQueue;
+            document.getElementById('kpiWaiting').innerText = currentWaiting;
+            document.getElementById('kpiRevenue').innerText = 'Rp ' + revenue.toLocaleString('id-ID');
+
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            queueData.forEach(customer => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>A-${customer.id}</strong></td>
+                    <td>${customer.name}</td>
+                    <td>${customer.qty} Pcs</td>
+                    <td>
+                        <button class="btn-action btn-call" onclick="callCustomer(${customer.id})">Panggil</button>
+                        <button class="btn-action btn-done" onclick="finishCustomer(${customer.id})">Selesai</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function callCustomer(id) {
+            localStorage.setItem('currentServing', id.toString());
+            alert("Memanggil antrean A-" + id + " ke konter toko.");
+        }
+
+        function finishCustomer(id) {
+            let queueData = JSON.parse(localStorage.getItem('queueData'));
+            queueData = queueData.filter(q => q.id !== id);
+            localStorage.setItem('queueData', JSON.stringify(queueData));
+            
+            let totalServed = parseInt(localStorage.getItem('totalServedToday')) + 1;
+            localStorage.setItem('totalServedToday', totalServed.toString());
+            
+            renderDashboard();
+        }
+
+        // Otomatis merender ulang dashboard jika ada konsumen mendaftar baru di tab index.html
+        window.addEventListener('storage', function() {
+            renderDashboard();
+        });
+    </script>
+</body>
+</html>

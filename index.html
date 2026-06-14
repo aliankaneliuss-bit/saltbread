@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ana Saltbread - Portal Antrean Digital</title>
+    <style>
+        :root {
+            --primary-color: #4A3B32;
+            --accent-color: #D4AF37;
+            --bg-light: #FDFBF7;
+            --text-dark: #2C2520;
+            --text-muted: #7A7067;
+            --success: #2E7D32;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-dark); min-height: 100vh; display: flex; flex-direction: column; }
+
+        nav {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        nav h1 { font-size: 1.5rem; letter-spacing: 1px; }
+        nav h1 span { color: var(--accent-color); }
+        .badge-online { background-color: rgba(212, 175, 55, 0.2); color: var(--accent-color); border: 1px solid var(--accent-color); padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+
+        .container { max-width: 1200px; margin: 3rem auto; padding: 0 1rem; flex: 1; }
+        
+        .hero-section { text-align: center; margin-bottom: 3rem; }
+        .hero-section h2 { font-size: 2.2rem; color: var(--primary-color); }
+        .hero-section p { color: var(--text-muted); margin-top: 0.5rem; }
+
+        .grid-customer { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        @media (max-width: 768px) { .grid-customer { grid-template-columns: 1fr; } }
+
+        .card { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 20px rgba(74, 59, 50, 0.05); border: 1px solid #ECE7E1; }
+        .card h2 { margin-bottom: 1.5rem; color: var(--primary-color); border-bottom: 2px solid #F5F1EB; padding-bottom: 0.5rem; }
+
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; padding: 0.8rem; border: 1px solid #D1C7BD; border-radius: 8px; outline: none; }
+        .form-group input:focus { border-color: var(--accent-color); }
+
+        .btn-submit { width: 100%; background-color: var(--primary-color); color: white; border: none; padding: 1rem; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-submit:hover { background-color: #382C25; }
+
+        .queue-status-box { text-align: center; background: #FDFBF7; border: 2px dashed var(--accent-color); padding: 2rem; border-radius: 8px; margin-bottom: 1.5rem; }
+        .big-number { font-size: 4rem; font-weight: 800; color: var(--primary-color); margin: 0.5rem 0; }
+        
+        .info-row { display: flex; justify-content: space-between; padding: 0.8rem 0; border-bottom: 1px solid #F5F1EB; }
+
+        footer { text-align: center; padding: 2rem; background-color: #F5F1EB; font-size: 0.8rem; margin-top: auto; color: #A3968E; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <h1>Ana <span>Saltbread.</span></h1>
+        <div class="badge-online">● QR Ambil Antrean Aktif</div>
+    </nav>
+
+    <div class="container">
+        <div class="hero-section">
+            <h2>Scan dari Rumah, Antre Tanpa Lelah</h2>
+            <p>Pantau posisi antreanmu secara Real-Time tanpa perlu berdiri berjam-jam di toko.</p>
+        </div>
+
+        <div class="grid-customer">
+            <!-- FORM INPUT -->
+            <div class="card">
+                <h2>Form Antrean Digital</h2>
+                <form id="queueForm" onsubmit="registerQueue(event)">
+                    <div class="form-group">
+                        <label>Nama Lengkap</label>
+                        <input type="text" id="custName" placeholder="Masukkan nama Anda" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nomor WhatsApp</label>
+                        <input type="tel" id="custPhone" placeholder="Contoh: 08123456789" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Jumlah Pembelian (Maks. 5 pcs)</label>
+                        <select id="breadQty">
+                            <option value="1">1 Pcs</option><option value="2">2 Pcs</option>
+                            <option value="3">3 Pcs</option><option value="4">4 Pcs</option>
+                            <option value="5">5 Pcs</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-submit">Ambil Nomor Antrean</button>
+                </form>
+            </div>
+
+            <!-- STATUS LIVE -->
+            <div class="card">
+                <h2>Status Antrean Toko</h2>
+                <div class="queue-status-box">
+                    <p style="font-weight: 600; color: var(--text-muted);">NOMOR YANG SEDANG DILAYANI</p>
+                    <div class="big-number" id="liveServingNumber">A-12</div>
+                    <p style="color: var(--success); font-weight: bold; font-size: 0.9rem;">● Toko Sedang Beroperasi</p>
+                </div>
+
+                <div id="ticketResult" style="display: none; background: #F5FBF6; border: 1px solid #C8E6C9; padding: 1.2rem; border-radius: 8px;">
+                    <h4 style="color: var(--success); margin-bottom: 0.5rem;">✓ Berhasil Mengambil Antrean!</h4>
+                    <div class="info-row"><span>Nomor Kamu:</span><strong id="myTicketNum" style="color: var(--accent-color);">A-15</strong></div>
+                    <div class="info-row"><span>Sisa Antrean di Depan:</span><strong id="myWaitingCount">3 Orang</strong></div>
+                    <div class="info-row"><span>Estimasi Dipanggil:</span><strong id="myEstTime">15 Menit Lagi</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2026 Ana Saltbread Premium Corp. Halaman Portal Konsumen.</p>
+    </footer>
+
+    <script>
+        // Inisialisasi Database Lokal jika belum ada
+        if(!localStorage.getItem('currentServing')) localStorage.setItem('currentServing', '12');
+        if(!localStorage.getItem('totalServedToday')) localStorage.setItem('totalServedToday', '39');
+        if(!localStorage.getItem('queueData')) {
+            let initialQueue = [
+                { id: 13, name: "Budi Santoso", qty: 3 },
+                { id: 14, name: "Siti Rahma", qty: 2 },
+                { id: 15, name: "Rian Wijaya", qty: 5 }
+            ];
+            localStorage.setItem('queueData', JSON.stringify(initialQueue));
+        }
+
+        // Tampilkan nomor yang sedang dilayani saat ini
+        function updateLiveDisplay() {
+            document.getElementById('liveServingNumber').innerText = 'A-' + localStorage.getItem('currentServing');
+        }
+        updateLiveDisplay();
+
+        // Menerima input antrean baru
+        function registerQueue(event) {
+            event.preventDefault();
+            let queueData = JSON.parse(localStorage.getItem('queueData'));
+            let currentServing = parseInt(localStorage.getItem('currentServing'));
+            
+            const name = document.getElementById('custName').value;
+            const qty = parseInt(document.getElementById('breadQty').value);
+            const nextId = queueData.length > 0 ? queueData[queueData.length - 1].id + 1 : currentServing + 1;
+
+            queueData.push({ id: nextId, name: name, qty: qty });
+            localStorage.setItem('queueData', JSON.stringify(queueData));
+
+            // Tampilkan Tiket
+            document.getElementById('ticketResult').style.display = 'block';
+            document.getElementById('myTicketNum').innerText = 'A-' + nextId;
+            
+            let waitingCount = nextId - currentServing;
+            document.getElementById('myWaitingCount').innerText = waitingCount + " Orang";
+            document.getElementById('myEstTime').innerText = (waitingCount * 5) + " Menit Lagi";
+
+            document.getElementById('queueForm').reset();
+            alert("Antrean sukses disimpan ke database lokal!");
+        }
+
+        // Otomatis update tampilan jika operator mengubah data di tab sebelah (dashboard.html)
+        window.addEventListener('storage', function() {
+            updateLiveDisplay();
+        });
+    </script>
+</body>
+</html>
